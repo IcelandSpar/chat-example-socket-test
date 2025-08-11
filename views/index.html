@@ -19,13 +19,40 @@
     </style>
 </head>
 <body>
+  <dialog id="nicknameDialog">
+    <form id="nicknameForm" action="">
+      <label for="nickname">Enter your Nickname:</label>
+      <input type="text" id="nickname" name="nickname">
+      <div class="nickNameBtnsCont">
+        <button>Close</button>
+        <button type="submit">Submit</button>
+      </div>
+    </form>
+  </dialog>
+  <h1 id='welcomeUserHeading'></h1>
+  <ul id="messages">
+    <li>Welcome to the chat room! Everyone is welcome here !</li>
+  </ul>
   <form id="form" action="">
     <input id="input" autocomplete="off" type="text">
     <button>Send</button>
   </form>
-  <ul id="messages"></ul>
+
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    const dialog = document.getElementById('nicknameDialog');
+    const nicknameForm = document.getElementById('nicknameForm');
+    const nicknameInput = document.getElementById('nickname');
+
+    nicknameInput.value = sessionStorage.getItem('nickname');
+    const welcomeUserHeading = document.getElementById('welcomeUserHeading')
+    welcomeUserHeading.textContent = 'Welcome to the chat room ' + sessionStorage.getItem('nickname')
+
+
+
+    dialog.showModal();
+
+    
     const socket = io();
 
     const form = document.getElementById('form');
@@ -34,17 +61,33 @@
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if(input.value) {
-        socket.emit('chat message', input.value);
+        socket.emit('chat message', input.value, window.sessionStorage.getItem('nickname'));
+
+      const item = document.createElement('li');
+      item.textContent = (sessionStorage.getItem('nickname') || 'Anonymous') + ': ' + input.value;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+
         input.value = '';
+
+
       };
     });
 
-    socket.on('chat message', (msg) => {
+    nicknameForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      window.sessionStorage.setItem('nickname', nickname.value);
+      dialog.close();
+    })
+
+    socket.on('chat message', (msg, user) => {
       const item = document.createElement('li');
-      item.textContent = msg;
+      item.textContent = (user || 'Anonymous') + ': ' + msg;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     })
+
+
   </script>
 </body>
 </html>
