@@ -17,6 +17,10 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('chat message', msg, user);
   })
 
+  socket.on('user typing', (user) => {
+    socket.broadcast.emit('user typing', user)
+  })
+
   socket.on('disconnect', () => {
     io.emit('chat message', 'user left the chat')
   })
